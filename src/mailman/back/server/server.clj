@@ -29,7 +29,11 @@
              :swagger {:info {:title "Mailman Backend API"}
                        :basePath "/"} ;; prefix for all paths
              :handler (swagger/create-swagger-handler)}}]
-     [routes/math ]]
+     [
+      routes/api-test
+      routes/graphql
+      routes/account
+      ]]
 
     {:data {:coercion reitit.coercion.spec/coercion
             :muuntaja m/instance
@@ -57,7 +61,7 @@
 
 (defn start-server []
   (if (nil? @server )
-    (do (reset! server (httpkit-server/run-server #'app2 {:port 3000 :join? false}))
+    (do (reset! server (httpkit-server/run-server #'app {:port 3000 :join? false}))
         (println "Started server, running on port: 3000."))
     (println "Server is already running, aborting start-server.")))
 
