@@ -12,7 +12,9 @@
                  [com.github.seancorfield/honeysql "2.4.1045"]
                  [org.xerial/sqlite-jdbc "3.42.0.0"]
                  [org.clojure/data.csv "1.0.1"]
+                 ;; Java interop with ns com.google.common.net.InternetDomainName to extract domain information
                  [com.google.guava/guava  "32.1.2-jre"]
+                 ;; Helpful functions not available in base clojure
                  [dev.weavejester/medley "1.7.0"]
                  ]
 
