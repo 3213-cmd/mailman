@@ -11,6 +11,7 @@
                  [arttuka/reagent-material-ui "5.11.12-0" :exclusions [arttuka/reagent-material-ui-js]]
                  [reagent "1.2.0"  :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]
                  [metosin/reitit "0.7.0-alpha5"]
+                 [cljs-ajax "0.8.4"]
                  ]
 
   :source-paths ["src" "target"]

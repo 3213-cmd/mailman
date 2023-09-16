@@ -33,7 +33,8 @@
    [reagent-mui.cljs-time-adapter :refer [cljs-time-adapter]]
    [reagent-mui.material.text-field :refer [text-field]]
    [reagent-mui.material.css-baseline :refer [css-baseline]]
-   [reagent-mui.x.date-picker :refer [date-picker]])
+   [reagent-mui.x.date-picker :refer [date-picker]]
+   [ajax.core :refer [GET POST]])
   (:import (goog.i18n DateTimeSymbols_en_US))
   )
 
@@ -91,6 +92,24 @@
 
 (defn multiply [a b] (* a b))
 
+(defn handler [response]
+  (.log js/console (str response)))
+
+(defn handler2 [response]
+  (println (get-in response ["results" 0 "dob"])))
+
+(defn handler3 [response]
+  ;; figute out how to get name for each
+  (doall (map println (js->clj response))))
+  ;; (println (get-in response ["entries" 1 "API"]))
+
+(defn get_test []
+  (GET "https://randomuser.me/api/" {:handler handler2
+                                     :response-format :json}))
+(defn get_test2 []
+  (GET "https://jsonplaceholder.typicode.com/users" {:handler handler3
+                                             :response-format :json}))
+
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:text "Hello worlds!"}))
 
@@ -138,6 +157,30 @@
                    ;; (js/alert "Hello there!")
                    } [(if @is-dark-mode brightness-4 brightness-7)]]
 
+     [button
+      {:variant "contained"
+       :size "small"
+       :on-click #(js/alert "Hello there!")
+       :color "primary"
+       }
+      "Alert"
+      ]
+     [button
+      {:variant "contained"
+       :size "small"
+       :color "primary"
+       :on-click #(get_test2)
+       }
+      "Api Test2"
+      ]
+     [button
+      {:variant "contained"
+       :size "small"
+       :color "primary"
+       :on-click #(get_test)
+       }
+      "Api Test"
+      ]
      ]
     ]]
   )
