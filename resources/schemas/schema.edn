@@ -22,7 +22,9 @@
             :account {:type :Account
                       :description "The account to which the service is registered to."}
             :information {:type :ServiceInformation
-                          :description "Additional information about the services."}}}
+                          :description "Additional information about the services."}
+            :subservices {:type (list :SubService)
+                          :description "List of subservices"}}}
   ;; TODO add descriptions
   :SubService
   {:description "Services known to the app"
