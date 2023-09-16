@@ -7,6 +7,7 @@ pom.xml
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/
+.lein-failures
 .repl
 .nrepl-port
 .cpcache/
@@ -17,3 +18,4 @@ node_modules/
 .lsp
 /resources/public/js/
 .envrc
+/clj-kondo
