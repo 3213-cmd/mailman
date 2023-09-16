@@ -8,7 +8,7 @@
    [next.jdbc.result-set :as rs]
    [clojure.java.io :as io]
    [clojure.data.csv :as csv]
-   [mailman.back.db.db :as db]))
+   [mailman.back.db.tables :as tables]))
 
 ;; TODO learn about result set https://github.com/seancorfield/next-jdbc/blob/develop/doc/getting-started.md
 ;; TODO learn about Map namespace syntax https://clojure.org/reference/reader
@@ -29,14 +29,6 @@
   (with-open [reader (io/reader file)]
     (rest (doall (csv/read-csv reader)))))
 
-(def account-table-query
-  "Query to create the table which contains accounts added by the user."
-  (-> (h/create-table :accounts :if-not-exists)
-      (h/with-columns
-        [:id :integer [:primary-key]]
-        [:name :string [:not nil] [:unique]])
-      (sql/format {:pretty true})))
-
 (defn insert-account
   "Insert a new account into the database and return the corresponding id."
   [account-name]
@@ -52,17 +44,6 @@
          (h/from :accounts)
          (h/where [:= :accounts.name account-name ] )
          (sql/format {:pretty true}))))))
-
-(def account-services-table-query
-  "Query to create the account_services table which contains all services belonging to an account"
-  (-> (h/create-table :account_services :if-not-exists)
-      (h/with-columns
-        [:id :integer [:primary-key]]
-        [:name :string [:not nil]]
-        [:account-id :int [:not nil]]
-        [:category :string ]
-        [[:foreign-key :account-id] [:references :accounts :id]])
-      (sql/format {:pretty true})))
 
 ;; REVIEW Add possible exceptions for "public email hosters" i.e gmx, hotmail, gmail etc.
 (defn insert-account-services
@@ -96,20 +77,6 @@
 ;;    (h/where [:= :domain "otto"])
 ;;    (sql/format {:pretty true})))
 
-(def account-service-details-table-query
-  "Query to create the account_service_details table which contains all detailed information about services belonging to an account"
-  (-> (h/create-table :account_service_details :if-not-exists)
-      (h/with-columns
-        [:id :integer [:primary-key]]
-        [:account-service-id :int]
-        [:email-address :string]
-        [:user-name :string]
-        [:display-name :string]
-        [:domain :string]
-        [:psl :string]
-        [[:foreign-key :account-service-id] [:references :account_services :id]])
-      (sql/format {:pretty true})))
-
 (defn get-account-service-id
   "Given an account-id and a service-name get the id from the account_services table"
   [account-id account-service-name]
@@ -133,21 +100,6 @@
                                       :psl (:psl %)) services))
                      (sql/format {:pretty true}))))
 
-;; Table for services known to the app, helps with the categorization and provides useful information
-;; such as links to change email or delete account
-;; data is provided by a csv file
-(def service-information-table-query
-  "Query to create the service-information table which contains general information about known services"
-  (-> (h/create-table :service-information :if-not-exists)
-      (h/with-columns
-        [:id :integer :primary-key]
-        [:name :string [:not nil]]
-        [:domain :string [:not nil]]
-        [:category :string [:not nil]]
-        [:change-link :string]
-        [:deletion-link :string])
-      (sql/format {:pretty true})))
-
 (defn read-services
   "Read service information from the services.csv and store that information in the service-information table."
   []
@@ -160,11 +112,11 @@
 (defn create-tables
   "Initialize the tables used by the application"
   []
-  (doall (map execute-query [account-table-query
-                             account-services-table-query
-                             service-information-table-query
+  (doall (map execute-query [tables/accounts
+                             tables/account-services
+                             tables/service-information
                              (read-services)
-                             account-service-details-table-query])))
+                             tables/account-service-details])))
 
 ;; TODO change later, currently deletes if exists, then create if doesn't (for tetsing)
 ;; later just create if doesn't exist
