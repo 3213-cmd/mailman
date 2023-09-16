@@ -100,16 +100,15 @@
 (defn insert-account-service-details
   "Given an account-id add details of it's services to the account_service_details table"
   [account-id services]
-  (-> (h/insert-into :account_service_details)
-      (h/values (map #(hash-map
-                       :account-service-id (get-account-service-id account-id (:maindomain %))
-                       :email_address (:email %)
-                       :user_name (:username %)
-                       :display_name (:display-name %)
-                       :domain (:domain %)
-                       :psl (:psl %)) services))
-      (sql/format {:pretty true})))
-
+  (execute-query (-> (h/insert-into :account_service_details)
+                     (h/values (map #(hash-map
+                                      :account_service_id (get-account-service-id account-id (:maindomain %))
+                                      :email_address (:email %)
+                                      :user_name (:username %)
+                                      :display_name (:display-name %)
+                                      :domain (:domain %)
+                                      :psl (:psl %)) services))
+                     (sql/format {:pretty true}))))
 
 ;; Table for services known to the app, helps with the categorization and provides useful information
 ;; such as links to change email or delete account
