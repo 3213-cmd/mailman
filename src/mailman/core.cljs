@@ -29,10 +29,13 @@
    [mailman.general.views]
    [reagent-mui.styles :as styles]
    [reagent-mui.colors :as colors]
+   [reagent-mui.x.localization-provider :refer [localization-provider]]
+   [reagent-mui.cljs-time-adapter :refer [cljs-time-adapter]]
    [reagent-mui.material.text-field :refer [text-field]]
    [reagent-mui.material.css-baseline :refer [css-baseline]]
-   [reagent-mui.x.date-picker :refer [date-picker]]
-   ))
+   [reagent-mui.x.date-picker :refer [date-picker]])
+  (:import (goog.i18n DateTimeSymbols_en_US))
+  )
 
 
 ;; WORKS with dev but not npm, check dev.cljs.edn and npm.cljs.edn
@@ -151,8 +154,9 @@
 (defn hello-world []
   [:<>
    [css-baseline]
-   [styles/theme-provider (styles/create-theme (if @is-dark-mode dark-theme light-theme))
-    [:div
+   [localization-provider {:date-adapter   cljs-time-adapter
+                           :adapter-locale DateTimeSymbols_en_US}
+    [styles/theme-provider (styles/create-theme (if @is-dark-mode dark-theme light-theme))
      (nav-bar)
      (current-page)
      ]]]
