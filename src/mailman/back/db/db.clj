@@ -153,8 +153,7 @@
                              account-services-table-query
                              service-information-table-query
                              (read-services)
-                             account-service-details-table-query]))
-  (insert-account "Test"))
+                             account-service-details-table-query])))
 
 ;; TODO change later, currently deletes if exists, then create if doesn't (for tetsing)
 ;; later just create if doesn't exist
