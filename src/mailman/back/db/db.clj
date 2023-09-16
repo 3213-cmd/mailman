@@ -42,10 +42,10 @@
   "Initialize the tables used by the application"
   []
   (doall (map execute-query [tables/accounts
-                             tables/account-services
+                             tables/services
                              tables/service-information
                              (read-services)
-                             tables/account-service-details])))
+                             tables/subservices])))
 
 ;; TODO change later, currently deletes if exists, then create if doesn't (for tetsing)
 ;; later just create if doesn't exist

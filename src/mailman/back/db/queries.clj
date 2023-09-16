@@ -19,10 +19,10 @@
        (h/columns :name)
        (h/values [[account-name]])
        (sql/format {:pretty true})))
-  (:accounts/id
+  (:accounts/account_id
    (first
     (execute-query
-     (-> (h/select :id)
+     (-> (h/select :account-id)
          (h/from :accounts)
          (h/where [:= :accounts.name account-name ] )
          (sql/format {:pretty true}))))))
@@ -37,18 +37,18 @@
 
 (defn get-account-services
   [account-id]
-  (execute-query ["Select id, name, account_id FROM account_services where account_id =?" account-id]))
+  (execute-query ["Select id, name, account_id FROM services where account_id =?" account-id]))
 
 (defn find-service-by-id
   [service-id]
   (first (execute-query ["Select id, name, domain, category, change_link, deletion_link FROM service_information where id =?" service-id])))
 
 ;; REVIEW Add possible exceptions for "public email hosters" i.e gmx, hotmail, gmail etc.
-(defn insert-account-services
-  "Given an account-id and a vector services, add that information to the account_services table."
+(defn insert-services
+  "Given an account-id and a vector services, add that information to the services table."
   [account-id services]
   (execute-query
-   (-> (h/insert-into :account_services)
+   (-> (h/insert-into :services)
        ;; (h/columns :name :account-id)
        ;; (h/values (map (comp #(conj % account-id) vector) services) )
        (h/values (map #(hash-map
@@ -62,25 +62,26 @@
                       services))
        (sql/format {:pretty true}))))
 
-(defn get-account-service-id
-  "Given an account-id and a service-name get the id from the account_services table"
-  [account-id account-service-name]
-  (-> (h/select :id)
-      (h/from :account_services)
-      (h/where
-       [:= :name account-service-name]
-       [:= :account-id account-id])))
+;; (defn get-account-service-id
+;;   "Given an account-id and a service-name get the id from the services table"
+;;   [account-id account-service-name]
+;;   (-> (h/select :id)
+;;       (h/from :services)
+;;       (h/where
+;;        [:= :name account-service-name]
+;;        [:= :account-id account-id])))
 
  ;; TODO  MAYBE Rewrite to insert key and remove unused keys (dissoc) in received hashmap instead of creating new hashmap?
-(defn insert-account-service-details
-  "Given an account-id add details of it's services to the account_service_details table"
+(defn insert-subservices
+  "Given an account-id add details of it's services to the subservices table"
   [account-id services]
-  (execute-query (-> (h/insert-into :account_service_details)
+  (execute-query (-> (h/insert-into :subservices)
                      (h/values (map #(hash-map
-                                      :account_service_id (get-account-service-id account-id (:maindomain %))
-                                      :email_address (:email %)
-                                      :user_name (:username %)
-                                      :display_name (:display-name %)
+                                      :account-id account-id
+                                      :service-name (:maindomain %)
+                                      :email-address (:email %)
+                                      :username (:username %)
+                                      :display-name (:display-name %)
                                       :domain (:domain %)
                                       :psl (:psl %)) services))
                      (sql/format {:pretty true}))))

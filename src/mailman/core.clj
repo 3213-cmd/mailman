@@ -21,8 +21,8 @@
   [account-name imap-server email-address email-password]
   (let [account-id (queries/insert-account account-name)]
     (reset! parsed-messages (mail/get-all-parsed-from-headers imap-server email-address email-password))
-    (queries/insert-account-services account-id (distinct (map :maindomain @parsed-messages)))
-    (queries/insert-account-service-details account-id @parsed-messages)
+    (queries/insert-services account-id (distinct (map :maindomain @parsed-messages)))
+    (queries/insert-subservices account-id @parsed-messages)
     ))
 
 
