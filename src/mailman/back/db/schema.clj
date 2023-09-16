@@ -13,7 +13,7 @@
   [row-data]
   (set/rename-keys row-data {:accounts/account_id     :accountId
                              :accounts/name   :name}))
-(defn get-account-by-id
+(defn resolve-account-by-id
   [_ args _]
   (remap-account (queries/find-account-by-id (:accountId args))))
 
@@ -23,14 +23,14 @@
                              :services/name :name
                              :services/category :category}))
 
-(defn get-account-services
+(defn resolve-services-by-account-id
   [_ _ args]
   (map remap-service (queries/find-account-services (:accountId args))))
 
 (defn resolver-map []
   ;; TODO learn more about partialfunctions
-  {:Query/account (partial get-account-by-id)
-   :Account/registeredServices (partial get-account-services)
+  {:Query/account (partial resolve-account-by-id)
+   :Account/registeredServices (partial resolve-services-by-account-id)
    })
 
 (defn load-schema
