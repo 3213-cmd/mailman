@@ -1,3 +1,4 @@
 Name, Domain, Category, Change-Link, Deletion-Link
-Steam, @steampowered.com, Entertainment, https://help.steampowered.com/en/faqs/view/6FD5-F2C7-B4B9-1713, https://help.steampowered.com/en/faqs/view/21A6-7C93-6CFE-100B
-Amazon, @amazon.com, Retail,
+Steam,steampowered,Entertainment,https://help.steampowered.com/en/faqs/view/6FD5-F2C7-B4B9-1713,https://help.steampowered.com/en/faqs/view/21A6-7C93-6CFE-100B
+Otto,otto,Retail,A,B
+Amazon,@amazon.com,Retail,A,B
