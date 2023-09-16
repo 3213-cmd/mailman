@@ -15,3 +15,5 @@ resources/public/cljs-out/
 .clj-kondo/.cache
 node_modules/
 .lsp
+/resources/public/js/
+.envrc
