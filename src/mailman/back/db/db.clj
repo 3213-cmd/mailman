@@ -60,6 +60,7 @@
         [:id :integer [:primary-key]]
         [:name :string [:not nil]]
         [:account-id :int [:not nil]]
+        [:category :string ]
         [[:foreign-key :account-id] [:references :accounts :id]])
       (sql/format {:pretty true})))
 
