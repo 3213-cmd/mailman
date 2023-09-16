@@ -7,7 +7,7 @@
             :name {:type String
                    :description "The account name"}}}
 
-  :Account_Service
+  :AccountService
   {:description "Services registered to an acocunt"
    :fields {:id          {:type (non-null Int)}
             :name        {:type (non-null String)}
@@ -21,8 +21,8 @@
             :name {:type String}
             :domain {:type String}
             :category {:type String}
-            :change_link {:type String}
-            :deletion_link {:type String}}}
+            :changeLink {:type String}
+            :deletionLink {:type String}}}
 
   :Query
   {:fields
@@ -32,11 +32,11 @@
     :service {:type :Service
               :description "Access a known service by its unique id, if it exists"
               :args {:id {:type Int}}}
-    :accountServiceByID {:type        :Account_Service
+    :accountServiceByID {:type        :AccountService
                          :description "Access a Account_Service by its unique id, if it exists."
                          :args
                          {:id {:type Int}}}
 
-    :accountServiceByName {:type :Account_Service
+    :accountServiceByName {:type :AccountService
                            :description "Access an Account_Service by it's name."
                            :args {:name {:type String}}}}}}}

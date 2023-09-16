@@ -19,8 +19,8 @@
                              :service_information/name   :name
                              :service_information/domain :domain
                              :service_information/category :category
-                             :service_information/change_link :change_link
-                             :service_information/deletion_link :deletion_link
+                             :service_information/change_link :changeLink
+                             :service_information/deletion_link :deletionLink
                              }))
 
 (defn account-by-id
