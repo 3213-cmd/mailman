@@ -10,6 +10,15 @@
    [reitit.coercion.spec :as rss]
    [spec-tools.data-spec :as ds]
    [fipp.edn :as fedn]
+   [reagent-mui.material.button :refer [button]]
+   [reagent-mui.material.app-bar :refer [app-bar]]
+   [reagent-mui.material.toolbar :refer [toolbar]]
+   [reagent-mui.material.typography :refer [typography]]
+   [reagent-mui.material.grid :refer [grid]]
+   [reagent-mui.material.box :refer [box]]
+   [reagent-mui.material.container  :refer [container]]
+   [reagent-mui.material.css-baseline :refer [css-baseline]]
+   [reagent-mui.styles :as styles]
    ))
 
 
@@ -63,25 +72,29 @@
 
 (defn home-page []
   [:div [:h2 "Hello I am at home!"]
-   [:li [:a {:href (rfe/href ::workpage)} "Frontpage"]]
+   [:li [:a {:href "#/about"} "Homepage"]]
    ])
 
 
-(defn work-page []
+(defn about-page []
   [:div
    [:h2 "Hello I am at work!"]
-   [:li [:a {:href (rfe/href ::frontpage)} "Frontpage"]]
+   [:li [:a {:href (rfe/href ::homepage)} "Workpage"]]
    ])
 
 
 (def routes
-  [["/"
-    {:name ::frontpage
+  [["/home"
+    {:name ::homepage
      :view home-page}]
 
    ["/about"
-    {:name ::about
-     :view work-page}]])
+    {:name ::aboutpage
+     :view about-page}]
+   ["/grid"
+    {:name ::grid
+     :view component}]
+   ])
 
 
 
@@ -96,12 +109,57 @@
 (defn get-app-element []
   (gdom/getElement "app"))
 
+
+(defonce match (atom nil))
+
+(defn current-page []
+  [:div
+   [app-bar
+    {:variant "dense"
+     :color "primary"
+     :position "static"}
+    [toolbar {
+              :color "primary"
+              :size "large"
+              :edge "start"
+              :class "top-bar-class"}
+     [button
+      {:variant "contained"
+       :size "small"
+       ;; :on-click #(js/alert "Hello there!")
+       }
+      [:a {:href (rfe/href ::aboutpage)} "Frontpage"]]
+     [button
+      {:variant "contained"
+       :size "small"
+       }[:a {:href (rfe/href ::homepage)} "Workpage"] ]
+     [button
+      {:variant "contained"
+       :size "small"
+       }
+      [:a {:href (rfe/href ::grid)} "Grid"]
+      ]]]
+   (if @match
+     (let [view (:view (:data @match))]
+       [view @match]))
+   ;; [:pre (with-out-str (fedn/pprint @match))]
+   ])
+
+
+(defn init! []
+  (rfe/start!
+   (rf/router routes {:data {:coercion rss/coercion}})
+   (fn [m] (reset! match m))
+   ;; set to false to enable HistoryAPI
+   {:use-fragment true})
+  )
+
+(init!)
 (defn hello-world []
   [:div
-   (component)
-   ;; (home-page)
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/mailman/core.cljs and watch it chang!"]])
+   (current-page)
+   ]
+  )
 
 (defn mount [el]
   (rdom/render [hello-world] el))
