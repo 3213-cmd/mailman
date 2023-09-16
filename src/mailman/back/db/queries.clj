@@ -43,6 +43,15 @@
   [service-id]
   (first (execute-query ["Select id, name, domain, category, change_link, deletion_link FROM service_information where id =?" service-id])))
 
+(defn find-service-information
+  [service-name]
+  (first (execute-query ["Select name, domain, category, change_link, deletion_link FROM service_information where domain =?" service-name])))
+
+(defn find-subservices
+  [account-id service-name]
+  (execute-query ["Select * FROM subservices where account_id =? AND service_name =?" account-id service-name]))
+(find-subservices 1 "substack")
+
 ;; REVIEW Add possible exceptions for "public email hosters" i.e gmx, hotmail, gmail etc.
 (defn insert-services
   "Given an account-id and a vector services, add that information to the services table."

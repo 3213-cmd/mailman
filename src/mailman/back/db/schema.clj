@@ -27,10 +27,41 @@
   [_ _ args]
   (map remap-service (queries/find-account-services (:accountId args))))
 
+(defn- remap-service-information
+  [row-data]
+  (set/rename-keys row-data {:service_information/name :name
+                             :service_information/domain :domain
+                             :service_information/category :category
+                             :service_information/change_link :changeLink
+                             :service_information/deletion_link :deletionLink
+                             }))
+(defn resolve-service-information
+  [_ _ args]
+  (println args)
+  (remap-service-information (queries/find-service-information (:name args))))
+
+(defn- remap-subservice
+  [row-data]
+  (set/rename-keys row-data {:subservices/subservice_id :subserviceId
+                             :subservices/account_id :accountId
+                             :subservices/service_name :serviceName
+                             :subservices/email_address :emailAddress
+                             :subservices/username :username
+                             :subservices/display_name :displayName
+                             :subservices/domain :domain
+                             :subservices/psl :psl
+                             }))
+
+(defn resolve-service-subservices
+  [_ _ args]
+  (map remap-subservice (queries/find-subservices (:accountId args) (:name args))))
+
 (defn resolver-map []
   ;; TODO learn more about partialfunctions
   {:Query/account (partial resolve-account-by-id)
    :Account/registeredServices (partial resolve-services-by-account-id)
+   :Service/information (partial resolve-service-information)
+   :Service/subservices (partial resolve-service-subservices)
    })
 
 (defn load-schema
