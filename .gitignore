@@ -20,3 +20,4 @@ node_modules/
 .envrc
 /clj-kondo
 .clj-kondo
+.projectile
