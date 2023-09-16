@@ -11,8 +11,11 @@
    [spec-tools.data-spec :as ds]
    [fipp.edn :as fedn]
    [reagent-mui.material.button :refer [button]]
+   [reagent-mui.material.chip :refer [chip]]
+   ;; FIGURE THIS OUT
    [reagent-mui.material.icon-button :refer [icon-button]]
    [reagent-mui.icons.airport-shuttle :refer  [airport-shuttle] ]
+   [reagent-mui.icons.ac-unit :refer [ac-unit]]
    [reagent-mui.material.app-bar :refer [app-bar]]
    [reagent-mui.material.toolbar :refer [toolbar]]
    [reagent-mui.material.typography :refer [typography]]
@@ -23,6 +26,7 @@
    [reagent-mui.styles :as styles]
    [mailman.mail-list.views]
    [mailman.general.views]
+   [reagent.core :as r]
    ))
 
 
@@ -64,7 +68,7 @@
 
 (defonce match (atom nil))
 
-(defn current-page []
+(defn nav-bar []
   [:div
    [app-bar
     {:variant "dense"
@@ -95,12 +99,16 @@
       "Mail List"
       ]
      [button {:variant "contained" } "Airports"]
-     ]]
-   (if @match
-     (let [view (:view (:data @match))]
-       [view @match]))
-   ;; [:pre (with-out-str (fedn/pprint @match))]
-   ])
+     [chip {:label "Chip" :icon (reagent/as-element [airport-shuttle])}  ]
+     ]]]
+  )
+
+(defn current-page []
+  (if @match
+    (let [view (:view (:data @match))]
+      [view @match]))
+  ;; [:pre (with-out-str (fedn/pprint @match))]
+  )
 
 
 (defn init! []
@@ -114,6 +122,7 @@
 (init!)
 (defn hello-world []
   [:div
+   (nav-bar)
    (current-page)
    ]
   )
