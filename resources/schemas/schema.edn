@@ -51,6 +51,9 @@
    {:account {:type :Account
               :description "Acces a registered Account by its unique id, if it exists"
               :args {:accountId {:type Int}}}
+    :allAccounts {:type (list Account)
+                  :descriptions "retrieve all registered Accounts"
+                  :args {}}
     :service {:type :Service
               :description "Access a known service by its unique id, if it exists"
               :args {:id {:type Int}}}}}}}
