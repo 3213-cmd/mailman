@@ -16,8 +16,11 @@
    [reagent-mui.material.icon-button :refer [icon-button]]
    [reagent-mui.icons.airport-shuttle :refer  [airport-shuttle] ]
    [reagent-mui.icons.ac-unit :refer [ac-unit]]
+   [reagent-mui.icons.brightness-4 :refer [brightness-4]]
+   [reagent-mui.icons.brightness-7 :refer [brightness-7]]
    [reagent-mui.material.app-bar :refer [app-bar]]
    [reagent-mui.material.toolbar :refer [toolbar]]
+   [reagent-mui.material.icon-button :refer [icon-button]]
    [reagent-mui.material.typography :refer [typography]]
    [reagent-mui.material.grid :refer [grid]]
    [reagent-mui.material.box :refer [box]]
@@ -26,8 +29,8 @@
    [reagent-mui.styles :as styles]
    [mailman.mail-list.views]
    [mailman.general.views]
-   [reagent.core :as r]
-   ))
+   [reagent-mui.colors :as colors]
+ ))
 
 
 ;; WORKS with dev but not npm, check dev.cljs.edn and npm.cljs.edn
@@ -53,6 +56,9 @@
    ])
 
 
+(def dark-theme
+{:palette {:primary   colors/purple
+             :secondary colors/green}}  )
 
 
 (println "This text is printed from src/mailman/core.cljs. Go ahead and edits it and see reloading in action.")
@@ -67,6 +73,7 @@
 
 
 (defonce match (atom nil))
+(defonce is-dark-mode (atom false))
 
 (defn nav-bar []
   [:div
@@ -98,9 +105,15 @@
        }
       "Mail List"
       ]
-     [button {:variant "contained" } "Airports"]
-     [chip {:label "Chip" :icon (reagent/as-element [airport-shuttle])}  ]
-     ]]]
+     [chip {:label "Chip" :icon (reagent/as-element [brightness-7])}  ]
+     [icon-button {:color "error"
+                   :on-click
+                   #((if @is-dark-mode (reset! is-dark-mode false) (reset! is-dark-mode true)) (println is-dark-mode) )
+                   ;; (js/alert "Hello there!")
+                   } [(if @is-dark-mode brightness-4 brightness-7)]]
+
+     ]
+    ]]
   )
 
 (defn current-page []
@@ -121,6 +134,8 @@
 
 (init!)
 (defn hello-world []
+  ;; [css-baseline]
+  ;; [styles/theme-provider (styles/create-theme dark-theme)]
   [:div
    (nav-bar)
    (current-page)
