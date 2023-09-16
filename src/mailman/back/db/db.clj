@@ -1,110 +1,201 @@
 (ns mailman.back.db.db
   (:require
    [honey.sql :as sql]
+   [honey.sql.helpers :refer :all :as h]
+   ;; helper functions overwrite some core namespaces.
+   [clojure.core :as c]
    [next.jdbc :as jdbc]
    [next.jdbc.result-set :as rs]
    [clojure.java.io :as io]
    [clojure.data.csv :as csv]
-   ))
+   [mailman.back.db.db :as db]))
 
-;; Check if DB Exists
-;; If not initialize
-;; Use SeedData to generate category mapping
-;; Using HoneySQL
-
-;; Creates DB -> TODO See if I can place it into a specific folder
-;; TODO Check if DB exists if not initialize it
-;; TODO Function to Update Data
-
-
-
-
-
+;; TODO learn about result set https://github.com/seancorfield/next-jdbc/blob/develop/doc/getting-started.md
+;; TODO learn about Map namespace syntax https://clojure.org/reference/reader
+;; REVIEW move queries to another namespace?
 
 (def services-file "./src/mailman/back/db/services.csv")
 (def db-file "target/public/db/db.db")
 (def db-spec {:dbtype "sqlite" :dbname db-file})
 (def db-source (jdbc/get-datasource db-spec))
 
-(defn execute-query [query]
-  (jdbc/execute! db-source query)
-  )
+(defn execute-query
+  "Helper function to execute query directly on the db file, without specifying options again."
+  [query]
+  (jdbc/execute! db-source query))
 
-;; check if doall is needed, or how to adjust
+;; TODO check if doall is needed, or how to adjust
 (defn read-csv [file]
   (with-open [reader (io/reader file)]
-    (doall (csv/read-csv reader))))
-
-(read-csv services-file)
+    (rest (doall (csv/read-csv reader)))))
 
 
 
-;; One Table is Prepopulated with: Name (domain), Category. Websitelink, Link to Delete, Link to Change
-;; Another Table Holds: provided name, website domain
 
-;; TODO move queries to another namespace?
-(def sql-create-service-table-map
-  (-> {:create-table [:services :if-not-exists]
-       :with-columns [[:id :integer :primary-key]
-                      [:name :string [:not nil]]
-                      [:domain :string [:not nil]]
-                      [:category :string [:not nil]]
-                      ]}
+
+
+(def account-table-query
+  "Query to create the table which contains accounts added by the user."
+  (-> (h/create-table :accounts :if-not-exists)
+      (h/with-columns
+        [:id :integer [:primary-key]]
+        [:name :string [:not nil] [:unique]])
       (sql/format {:pretty true})))
-(print sql-create-service-table-map)
 
-(def sql-read-services-csv
+
+(defn insert-account
+  "Insert a new account into the database and return the corresponding id."
+  [account-name]
+  (execute-query
+   (-> (h/insert-into :accounts)
+       (h/columns :name)
+       (h/values [[account-name]])
+       (sql/format {:pretty true})))
+  (:accounts/id
+   (first
+    (execute-query
+     (-> (h/select :id)
+         (h/from :accounts)
+         (h/where [:= :accounts.name account-name ] )
+         (sql/format {:pretty true}))))))
+
+
+(def account-services-table-query
+  "Query to create the account_services table which contains all services belonging to an account"
+  (-> (h/create-table :account_services :if-not-exists)
+      (h/with-columns
+        [:id :integer [:primary-key]]
+        [:name :string [:not nil]]
+        [:account-id :int [:not nil]]
+        [[:foreign-key :account-id] [:references :accounts :id]])
+      (sql/format {:pretty true})))
+
+
+;; REVIEW Add possible exceptions for "public email hosters" i.e gmx, hotmail, gmail etc.
+(defn insert-account-services
+  "Given an account-id and a vector services, add that information to the account_services table."
+  [account-id services]
+  (execute-query
+   (-> (h/insert-into :account_services)
+       (h/columns :name :account-id)
+       (h/values (map (comp #(conj % account-id) vector) services) )
+       (sql/format {:prettry true}))))
+
+
+(def account-service-details-table-query
+  "Query to create the account_service_details table which contains all detailed information about services belonging to an account"
+  (-> (h/create-table :account_service_details :if-not-exists)
+      (h/with-columns
+        [:id [:primary-key]]
+        [:account-service-id :int]
+        [:email-address :string]
+        [:user-name :string]
+        [:display-name :string]
+        [:domain :string]
+        [:pisl :string]
+        [[:foreign-key :account-service-id] [:references :account_services :id]])
+      (sql/format {:pretty true})))
+
+
+(defn get-account-service-id
+  "Given an account-id and a service-name get the id from the account_services table"
+  [account-id account-service-name]
+  (-> (h/select :id)
+      (h/from :account_services)
+      (h/where
+       [:= :name account-service-name]
+       [:= :account-id account-id])))
+
+ ;; TODO  MAYBE Rewrite to insert key and remove unused keys (dissoc) in received hashmap instead of creating new hashmap?
+(defn insert-account-service-details
+  "Given an account-id add details of it's services to the account_service_details table"
+  [account-id services]
+  (-> (h/insert-into :account_service_details)
+      (h/values (map #(hash-map
+                       :account-service-id (get-account-service-id account-id (:maindomain %))
+                       :email_address (:email %)
+                       :user_name (:username %)
+                       :display_name (:display-name %)
+                       :domain (:domain %)
+                       :psl (:psl %)) services))
+      (sql/format {:pretty true})))
+
+
+;; Table for services known to the app, helps with the categorization and provides useful information
+;; such as links to change email or delete account
+;; data is provided by a csv file
+(def service-information-table-query
+  "Query to create the service-information table which contains general information about known services"
+  (-> (h/create-table :service-information :if-not-exists)
+      (h/with-columns
+        [:id :integer :primary-key]
+        [:name :string [:not nil]]
+        [:domain :string [:not nil]]
+        [:category :string [:not nil]]
+        [:change-link :string]
+        [:deletion-link :string])
+      (sql/format {:pretty true})))
+
+
+(defn read-services
+  "Read service information from the services.csv and store that information in the service-information table."
+  []
+  (-> (h/insert-into :service-information)
+      (h/columns :name :domain :category :change-link :deletion-link)
+      (h/values (read-csv services-file))
+      (sql/format {:pretty true})))
+
+;; TODO Check if this is still used
+(defn store-messages-in-db [parsed-messages]
   (-> {:insert-into [:services]
-       :columns [:name :domain :category]
-       :values (read-csv services-file)}
+       :columns [:name :domain]
+       :values (map first (vals  (group-by :domianwithtld (map (juxt :name :domainwithtld) parsed-messages))))}
       (sql/format {:pretty true})))
-(print sql-read-services-csv)
 
 
+;; not sure if doall is needed.
+(defn create-tables
+  "Initialize the tables used by the application"
+  []
+  (doall (map execute-query [account-table-query
+                             account-services-table-query
+                             service-information-table-query
+                             (read-services)
+                             account-service-details-table-query]))
+  (insert-account "Test"))
 
-;; Create The Tables
-(defn create-tables []
-  (execute-query sql-create-service-table-map)
-  (execute-query sql-read-services-csv))
-
-(defn start-db []
+;; TODO change later, currently deletes if exists, then create if doesn't (for tetsing)
+;; later just create if doesn't exist
+(defn start-db
+  "Initialize the Database"
+  []
   (if (.exists (io/file db-file))
-    (io/delete-file db-file)            ; Replace Later
+    (io/delete-file db-file)
     (create-tables))
   )
 
-(start-db)
+;; (start-db)
 
-(def sqlmap {:select [:a :b :c]
-             :from   [:foo]
-             :where  [:= :foo.a "baz"]})
+;; (defn get-all-users
+;;   []
+;;   (jdbc/execute!
+;;    db-source
+;;    ["create table Users (id int auto_increment primary key,
+;;    name varchar (255), email varchar (255))"])
 
+;;   (jdbc/execute!
+;;    db-source
+;;    ["insert into Users (name, email) values
+;;      ('The Doctor', 'timelord3000@tardis.com')"])
 
+;;   (jdbc/execute!
+;;    db-source
+;;    ["select * from users"])
 
+;;   (jdbc/execute!
+;;    db-source
+;;    ["select * from users"]
+;;    {:builder-fn rs/as-unqualified-lower-maps})
+;;   )
 
-
-
-
-(defn get-all-users
-  []
-  (jdbc/execute!
-   db-source
-   ["create table Users (id int auto_increment primary key,
-   name varchar (255), email varchar (255))"])
-
-  (jdbc/execute!
-   db-source
-   ["insert into Users (name, email) values
-     ('The Doctor', 'timelord3000@tardis.com')"])
-
-  (jdbc/execute!
-   db-source
-   ["select * from users"])
-
-  (jdbc/execute!
-   db-source
-   ["select * from users"]
-   {:builder-fn rs/as-unqualified-lower-maps})
-  )
-
-(get-all-users)
+;; (get-all-users)
