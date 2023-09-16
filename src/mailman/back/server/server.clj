@@ -11,6 +11,7 @@
     [reitit.ring.middleware.exception :as exception]
     [reitit.ring.middleware.multipart :as multipart]
     [reitit.ring.middleware.parameters :as parameters]
+    [ring.middleware.cors :refer [wrap-cors]]
     [muuntaja.core :as m]
     [ring.middleware.params :as params]
     [mailman.back.server.routes :as routes]
@@ -37,7 +38,9 @@
 
     {:data {:coercion reitit.coercion.spec/coercion
             :muuntaja m/instance
-            :middleware [ ;; query-params & form-params
+            :middleware [[wrap-cors :access-control-allow-origin [#"(?:^|\s)((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)"]
+                          :access-control-allow-methods [:get :put :post :patch :delete]]
+                         ;; query-params & form-params
                          parameters/parameters-middleware
                          ;; content-negotiation
                          muuntaja/format-negotiate-middleware
@@ -52,7 +55,8 @@
                          ;; coercing request parameters
                          coercion/coerce-request-middleware
                          ;; multipart
-                         multipart/multipart-middleware]}})
+                         multipart/multipart-middleware
+                         ]}})
    (ring/routes
     (swagger-ui/create-swagger-ui-handler {:path "/"})
     (ring/create-default-handler))))
