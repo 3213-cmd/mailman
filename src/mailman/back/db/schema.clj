@@ -56,9 +56,14 @@
   [_ _ args]
   (map remap-subservice (queries/find-subservices (:accountId args) (:name args))))
 
+;; TODO
+(defn resolve-all-accounts [_ _ _]
+  (map remap-account (queries/find-all-accounts)))
+
 (defn resolver-map []
   ;; TODO learn more about partialfunctions
   {:Query/account (partial resolve-account-by-id)
+   :Query/allAccounts (partial resolve-all-accounts)
    :Account/registeredServices (partial resolve-services-by-account-id)
    :Service/information (partial resolve-service-information)
    :Service/subservices (partial resolve-service-subservices)
