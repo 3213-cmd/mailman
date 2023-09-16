@@ -70,15 +70,37 @@
   [account-id services]
   (execute-query
    (-> (h/insert-into :account_services)
-       (h/columns :name :account-id)
-       (h/values (map (comp #(conj % account-id) vector) services) )
-       (sql/format {:prettry true}))))
+       ;; (h/columns :name :account-id)
+       ;; (h/values (map (comp #(conj % account-id) vector) services) )
+       (h/values (map #(hash-map
+                        :name %
+                        :account-id account-id
+                        :category [:ifnull (->
+                                            (h/select :category)
+                                            (h/from :service-information)
+                                            (h/where [:= :domain %])) [:inline "General"]])
+                      services))
+       (sql/format {:pretty true}))))
+
+;; TODO LEARN About different function syntax's in Honeysql
+;; (def test2
+;;   (->
+;;    (h/select [[:ifnull :category [:inline "General"]]])
+;;    (h/from :service-information)
+;;    (h/where [:= :domain "ottos"])
+;;    (sql/format {:pretty true})))
+;; (def test
+;;   (->
+;;    (h/select [:%ifnull.category])
+;;    (h/from :service-information)
+;;    (h/where [:= :domain "otto"])
+;;    (sql/format {:pretty true})))
 
 (def account-service-details-table-query
   "Query to create the account_service_details table which contains all detailed information about services belonging to an account"
   (-> (h/create-table :account_service_details :if-not-exists)
       (h/with-columns
-        [:id [:primary-key]]
+        [:id :integer [:primary-key]]
         [:account-service-id :int]
         [:email-address :string]
         [:user-name :string]
