@@ -23,10 +23,24 @@
                              :service_information/deletion_link :deletionLink
                              }))
 
+(defn- remap-account-service
+  [row-data]
+  (set/rename-keys row-data {:account_services/id :id
+                             :account_services/name :name
+                             :account_services/account_id :accountId
+                             }))
+
 (defn account-by-id
   []
   (fn [_ args _]
     (remap-account (queries/find-account-by-id (:id args)))))
+
+(defn services-by-account-id
+  []
+  (fn [_ args _]
+    (map remap-account-service (queries/get-account-services (:id args)))))
+
+((services-by-account-id) 1 {:id 1} 1)
 
 (defn service-by-id
   []
@@ -35,7 +49,8 @@
 
 (defn resolver-map []
   {:Query/account (account-by-id)
-   :Query/service (service-by-id)})
+   :Query/service (service-by-id)
+   :Query/accountServicesByAccountID (services-by-account-id)})
 
 (defn load-schema
   []

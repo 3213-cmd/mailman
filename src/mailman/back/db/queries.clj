@@ -35,6 +35,10 @@
   (first (execute-query
           ["SELECT id, name FROM accounts where id = ?" account-id])))
 
+(defn get-account-services
+  [account-id]
+  (execute-query ["Select id, name, account_id FROM account_services where account_id =?" account-id]))
+
 (defn find-service-by-id
   [service-id]
   (first (execute-query ["Select id, name, domain, category, change_link, deletion_link FROM service_information where id =?" service-id])))

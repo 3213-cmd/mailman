@@ -28,5 +28,6 @@
 (-> (lacinia/execute schema query-string nil nil)
       simplify))
 
-;; (q "{ account(id: 1) { id name }}" )
-;; (q "{ service(id: 2) { id domain }}" )
+(q "{ account(id: 1) { id name }}" )
+(q "{ accountServicesByAccountID(id: 1) { id name }}" )
+(q "{ service(id: 2) { id domain }}" )

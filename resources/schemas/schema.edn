@@ -32,6 +32,10 @@
     :service {:type :Service
               :description "Access a known service by its unique id, if it exists"
               :args {:id {:type Int}}}
+    :accountServicesByAccountID {:type (list :AccountService)
+                         :description "Access a Account_Service by its unique id, if it exists."
+                         :args
+                         {:id {:type Int}}}
     :accountServiceByID {:type        :AccountService
                          :description "Access a Account_Service by its unique id, if it exists."
                          :args
