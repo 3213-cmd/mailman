@@ -29,11 +29,6 @@
   (with-open [reader (io/reader file)]
     (rest (doall (csv/read-csv reader)))))
 
-
-
-
-
-
 (def account-table-query
   "Query to create the table which contains accounts added by the user."
   (-> (h/create-table :accounts :if-not-exists)
@@ -41,7 +36,6 @@
         [:id :integer [:primary-key]]
         [:name :string [:not nil] [:unique]])
       (sql/format {:pretty true})))
-
 
 (defn insert-account
   "Insert a new account into the database and return the corresponding id."
@@ -59,7 +53,6 @@
          (h/where [:= :accounts.name account-name ] )
          (sql/format {:pretty true}))))))
 
-
 (def account-services-table-query
   "Query to create the account_services table which contains all services belonging to an account"
   (-> (h/create-table :account_services :if-not-exists)
@@ -69,7 +62,6 @@
         [:account-id :int [:not nil]]
         [[:foreign-key :account-id] [:references :accounts :id]])
       (sql/format {:pretty true})))
-
 
 ;; REVIEW Add possible exceptions for "public email hosters" i.e gmx, hotmail, gmail etc.
 (defn insert-account-services
@@ -81,7 +73,6 @@
        (h/values (map (comp #(conj % account-id) vector) services) )
        (sql/format {:prettry true}))))
 
-
 (def account-service-details-table-query
   "Query to create the account_service_details table which contains all detailed information about services belonging to an account"
   (-> (h/create-table :account_service_details :if-not-exists)
@@ -92,10 +83,9 @@
         [:user-name :string]
         [:display-name :string]
         [:domain :string]
-        [:pisl :string]
+        [:psl :string]
         [[:foreign-key :account-service-id] [:references :account_services :id]])
       (sql/format {:pretty true})))
-
 
 (defn get-account-service-id
   "Given an account-id and a service-name get the id from the account_services table"
@@ -135,7 +125,6 @@
         [:change-link :string]
         [:deletion-link :string])
       (sql/format {:pretty true})))
-
 
 (defn read-services
   "Read service information from the services.csv and store that information in the service-information table."
