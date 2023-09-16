@@ -16,6 +16,7 @@
                  [com.google.guava/guava  "32.1.2-jre"]
                  ;; Helpful functions not available in base clojure
                  [dev.weavejester/medley "1.7.0"]
+                 [com.walmartlabs/lacinia "1.2.1"]
                  ]
 
   :source-paths ["src" "target"]
