@@ -15,6 +15,7 @@ pom.xml
 resources/public/cljs-out/
 .clj-kondo/.cache
 node_modules/
+/.lsp
 .lsp
 /resources/public/js/
 .envrc
