@@ -145,14 +145,6 @@
       (h/values (read-csv services-file))
       (sql/format {:pretty true})))
 
-;; TODO Check if this is still used
-(defn store-messages-in-db [parsed-messages]
-  (-> {:insert-into [:services]
-       :columns [:name :domain]
-       :values (map first (vals  (group-by :domianwithtld (map (juxt :name :domainwithtld) parsed-messages))))}
-      (sql/format {:pretty true})))
-
-
 ;; not sure if doall is needed.
 (defn create-tables
   "Initialize the tables used by the application"
