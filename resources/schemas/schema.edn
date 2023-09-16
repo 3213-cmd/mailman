@@ -1,46 +1,54 @@
-;; Figure out how to query linked objects
 {:objects
+ ;; Objects
  {:Account
-  {:description "An Account registered to the mailman service"
-   :fields {:id {:type Int
-                 :description "The unique ID of the account"}
+  {:description "An account registered to the mailman service."
+   :fields {:accountId {:type Int
+                        :description "The unique id of the account."}
             :name {:type String
-                   :description "The account name"}}}
+                   :description "The account name"}
+            :registeredServices {:type (list :Service)
+                                 :description "List of services registered to the account"}}}
 
-  :AccountService
-  {:description "Services registered to an acocunt"
-   :fields {:id          {:type (non-null Int)}
-            :name        {:type (non-null String)}
-            :account_id  {:type        Int
-                          :description "The id of the account, that the service is connected with."}
-            :category    {:type        String
-                          :description "The categorization of the service"}}}
   :Service
+  {:description "A service registered to an acocunt."
+   :fields {
+            ;; :id          {:type (non-null Int)}
+            :accountId  {:type        Int
+                         :description "The id of the account, that the service is connected with."}
+            :name        {:type (non-null String)
+                          :description "The name of the registered service."}
+            :category    {:type        String
+                          :description "The categorization of the service."}
+            :account {:type :Account
+                      :description "The account to which the service is registered to."}
+            :information {:type :ServiceInformation
+                          :description "Additional information about the services."}}}
+  ;; TODO add descriptions
+  :SubService
   {:description "Services known to the app"
-   :fields {:id {:type Int}
-            :name {:type String}
+   :fields {:subServiceId {:type Int}
+            :accountId {:type Int}
+            :serviceName {:type String}
+            :emailAddress {:type String}
+            :username {:type String}
+            :displayName {:type String}
+            :domain {:type String}
+            :psl {:type String}}}
+
+  :ServiceInformation
+  {:description "Services known to the app"
+   :fields {:name {:type String}
             :domain {:type String}
             :category {:type String}
             :changeLink {:type String}
             :deletionLink {:type String}}}
-
+  ;; Queries
+  ;; TODO Read more documentation to understand topics such as: mutations, subscriptions, directives, deprecation
   :Query
   {:fields
    {:account {:type :Account
               :description "Acces a registered Account by its unique id, if it exists"
-              :args {:id {:type Int}}}
+              :args {:accountId {:type Int}}}
     :service {:type :Service
               :description "Access a known service by its unique id, if it exists"
-              :args {:id {:type Int}}}
-    :accountServicesByAccountID {:type (list :AccountService)
-                         :description "Access a Account_Service by its unique id, if it exists."
-                         :args
-                         {:id {:type Int}}}
-    :accountServiceByID {:type        :AccountService
-                         :description "Access a Account_Service by its unique id, if it exists."
-                         :args
-                         {:id {:type Int}}}
-
-    :accountServiceByName {:type :AccountService
-                           :description "Access an Account_Service by it's name."
-                           :args {:name {:type String}}}}}}}
+              :args {:id {:type Int}}}}}}}

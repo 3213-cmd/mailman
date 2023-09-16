@@ -33,11 +33,11 @@
   ;; (println "Hello")
   ;; (println account-id)
   (first (execute-query
-          ["SELECT id, name FROM accounts where id = ?" account-id])))
+          ["SELECT account_id, name FROM accounts where account_id = ?" account-id])))
 
-(defn get-account-services
+(defn find-account-services
   [account-id]
-  (execute-query ["Select id, name, account_id FROM services where account_id =?" account-id]))
+  (execute-query ["Select account_id, name, category FROM services where account_id =?" account-id]))
 
 (defn find-service-by-id
   [service-id]

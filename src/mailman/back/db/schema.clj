@@ -6,51 +6,32 @@
             [clojure.edn :as edn]
             [next.jdbc :as jdbc]
             [clojure.set :as set]
+            [com.walmartlabs.lacinia.executor :as executor]
             [mailman.back.db.queries :as queries]))
 
 (defn- remap-account
   [row-data]
-  (set/rename-keys row-data {:accounts/id     :id
+  (set/rename-keys row-data {:accounts/account_id     :accountId
                              :accounts/name   :name}))
+(defn get-account-by-id
+  [_ args _]
+  (remap-account (queries/find-account-by-id (:accountId args))))
 
 (defn- remap-service
   [row-data]
-  (set/rename-keys row-data {:service_information/id     :id
-                             :service_information/name   :name
-                             :service_information/domain :domain
-                             :service_information/category :category
-                             :service_information/change_link :changeLink
-                             :service_information/deletion_link :deletionLink
-                             }))
+  (set/rename-keys row-data {:services/account_id :accountId
+                             :services/name :name
+                             :services/category :category}))
 
-(defn- remap-account-service
-  [row-data]
-  (set/rename-keys row-data {:account_services/id :id
-                             :account_services/name :name
-                             :account_services/account_id :accountId
-                             }))
-
-(defn account-by-id
-  []
-  (fn [_ args _]
-    (remap-account (queries/find-account-by-id (:id args)))))
-
-(defn services-by-account-id
-  []
-  (fn [_ args _]
-    (map remap-account-service (queries/get-account-services (:id args)))))
-
-((services-by-account-id) 1 {:id 1} 1)
-
-(defn service-by-id
-  []
-  (fn [_ args _]
-    (remap-service (queries/find-service-by-id (:id args)))))
+(defn get-account-services
+  [_ _ args]
+  (map remap-service (queries/find-account-services (:accountId args))))
 
 (defn resolver-map []
-  {:Query/account (account-by-id)
-   :Query/service (service-by-id)
-   :Query/accountServicesByAccountID (services-by-account-id)})
+  ;; TODO learn more about partialfunctions
+  {:Query/account (partial get-account-by-id)
+   :Account/registeredServices (partial get-account-services)
+   })
 
 (defn load-schema
   []
