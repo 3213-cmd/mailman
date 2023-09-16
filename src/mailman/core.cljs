@@ -65,16 +65,24 @@
 {:palette {
            :mode "light"
            :primary {
-                     :main "#5ee0c1"
+                     :main "#ff9800"
                      :light "#c15ee0"
                      }
+           ;; :background {
+           ;; :default "#FF0000"}
            }
  })
 
 
 (def dark-theme
 {:palette {
-           :mode "dark"}
+           :mode "dark"
+           :primary {
+                     :main "#c15ee0"
+                     }
+           :background {
+           :default "#050505"}
+           }
  })
 
 
@@ -153,10 +161,10 @@
 (init!)
 (defn hello-world []
   [:<>
-   [css-baseline]
-   [localization-provider {:date-adapter   cljs-time-adapter
-                           :adapter-locale DateTimeSymbols_en_US}
-    [styles/theme-provider (styles/create-theme (if @is-dark-mode dark-theme light-theme))
+   [styles/theme-provider (styles/create-theme (if @is-dark-mode dark-theme light-theme))
+    [css-baseline]
+    [localization-provider {:date-adapter   cljs-time-adapter
+                            :adapter-locale DateTimeSymbols_en_US}
      (nav-bar)
      (current-page)
      ]]]
