@@ -19,3 +19,4 @@ node_modules/
 /resources/public/js/
 .envrc
 /clj-kondo
+.clj-kondo
