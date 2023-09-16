@@ -1,0 +1,9 @@
+^{:watch-dirs      ["test" "src"]
+  :auto-bundle     :webpack
+  :bundle-freq     :smart
+  :css-dirs ["resources/public/css"]
+  :auto-testing true
+  :final-output-to "target/public/js/app.js"}
+{:main mailman.core
+ :infer-externs true
+ :language-in :es-next}
