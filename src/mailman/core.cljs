@@ -25,12 +25,14 @@
    [reagent-mui.material.grid :refer [grid]]
    [reagent-mui.material.box :refer [box]]
    [reagent-mui.material.container  :refer [container]]
-   [reagent-mui.material.css-baseline :refer [css-baseline]]
-   [reagent-mui.styles :as styles]
    [mailman.mail-list.views]
    [mailman.general.views]
+   [reagent-mui.styles :as styles]
    [reagent-mui.colors :as colors]
- ))
+   [reagent-mui.material.text-field :refer [text-field]]
+   [reagent-mui.material.css-baseline :refer [css-baseline]]
+   [reagent-mui.x.date-picker :refer [date-picker]]
+   ))
 
 
 ;; WORKS with dev but not npm, check dev.cljs.edn and npm.cljs.edn
@@ -56,12 +58,25 @@
    ])
 
 
+(def light-theme
+{:palette {
+           :mode "light"
+           :primary {
+                     :main "#5ee0c1"
+                     :light "#c15ee0"
+                     }
+           }
+ })
+
+
 (def dark-theme
-{:palette {:primary   colors/purple
-             :secondary colors/green}}  )
+{:palette {
+           :mode "dark"}
+ })
 
 
 (println "This text is printed from src/mailman/core.cljs. Go ahead and edits it and see reloading in action.")
+(println (get  (get  (get light-theme :palette) :primary) :main))
 
 (defn multiply [a b] (* a b))
 
@@ -102,12 +117,12 @@
       {:variant "contained"
        :size "small"
        :href (rfe/href ::mail-list)
+       :color "primary"
        }
       "Mail List"
       ]
      [chip {:label "Chip" :icon (reagent/as-element [brightness-7])}  ]
-     [icon-button {:color "error"
-                   :on-click
+     [icon-button {:on-click
                    #((if @is-dark-mode (reset! is-dark-mode false) (reset! is-dark-mode true)) (println is-dark-mode) )
                    ;; (js/alert "Hello there!")
                    } [(if @is-dark-mode brightness-4 brightness-7)]]
@@ -134,12 +149,13 @@
 
 (init!)
 (defn hello-world []
-  ;; [css-baseline]
-  ;; [styles/theme-provider (styles/create-theme dark-theme)]
-  [:div
-   (nav-bar)
-   (current-page)
-   ]
+  [:<>
+   [css-baseline]
+   [styles/theme-provider (styles/create-theme (if @is-dark-mode dark-theme light-theme))
+    [:div
+     (nav-bar)
+     (current-page)
+     ]]]
   )
 
 (defn mount [el]
