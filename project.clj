@@ -16,6 +16,15 @@
                  [com.google.guava/guava  "32.1.2-jre"]
                  ;; Helpful functions not available in base clojure
                  [dev.weavejester/medley "1.7.0"]
+                 ;; Webserver
+                 [org.babashka/http-client "0.4.15"]
+                 [javax.servlet/servlet-api "2.5"]
+                 [http-kit "2.7.0"]
+                 [ring "1.10.0"]
+                 [metosin/reitit "0.7.0-alpha5"]
+                 [metosin/muuntaja "0.6.8"]
+                 [cheshire "5.11.0"]
+                 ;; GraphQL
                  [com.walmartlabs/lacinia "1.2.1"]
                  ]
 

@@ -45,6 +45,30 @@
 ;; WORKS with dev but not npm, check dev.cljs.edn and npm.cljs.edn
 (println "This text is printed from src/mailman/core.cljs. Go ahead and edits it and see reloading in action.")
 
+
+;; (defn handler [response]
+;;   (.log js/console (str response)))
+;; (defonce match (atom nil))
+
+;; (defn handler2 [response]
+;;   (get-in response ["results" 0 "dob"]))
+;; ;; Themeing
+
+;; (defn handler3 [response]
+;;   ;; figute out how to get name for each
+;;   (doall (map println (js->clj response))))
+;;   ;; (println (get-in response ["entries" 1 "API"]))
+
+;; (defn get_test []
+;;   (ajax.core/GET "https://randomuser.me/api/" {:handler handler2
+;;                                      :response-format :json}))
+;; (defn get_test2 []
+;;   (GET "http://localhost:3000/accounts/all" {:handler handler3
+;;                                              :response-format :json}))
+;; (get_test2)
+
+
+
 (def routes
   [["/home"
     {:name ::home
@@ -169,4 +193,4 @@
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+  )

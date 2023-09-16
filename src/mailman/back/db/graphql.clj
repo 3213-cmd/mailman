@@ -27,7 +27,11 @@
   [query-string]
 (-> (lacinia/execute schema query-string nil nil)
       simplify))
-
-(q "{ account(id: 1) { id name }}" )
-(q "{ accountServicesByAccountID(id: 1) { id name }}" )
-(q "{ service(id: 2) { id domain }}" )
+;; (q {:acocunt 1})
+;; TODO learn about introspection
+(q "{allAccounts {name}}")
+;; (q "{ account(accountId: 1) { accountId name}}" )
+;; (q "{ account(accountId: 1) { accountId name registeredServices {name information {name category changeLink} subservices {serviceName psl}}}}" )
+;; (q "{ account(id: 1) { id name registeredServices {name id belongingAccount {name id}}  }}" )
+;; (q "{ accountServicesByAccountID(id: 1) { id name }}" )
+;; (q "{ service(id: 2) { id domain }}" )

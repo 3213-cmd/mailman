@@ -216,9 +216,12 @@
             [button {:variant "contained"
                      :on-click (fn [] (reset-add-account-state))} "Reset"]]]]]]])))
 
+
+
+
+
 ;; https://legacy.reactjs.org/docs/fragments.html
 ;; https://stackoverflow.com/questions/71438263/how-to-return-two-customsvgseries-from-a-single-function-in-clojurescript
-(defonce index (atom 0))
 (defonce page-state (atom {:index 0} ))
 (defn account-tabs []
   [tabs {:centered true
@@ -238,9 +241,19 @@
          :label "Manage Accounts"}]])
 
 
+(defn show-accounts []
+  (let [accounts (GET "http://localhost:3000/accounts/all")]
+    (println accounts)))
+
+(show-accounts)
+
 (defn home-page []
   [:<>
    [account-tabs]
    ;; Atom States are lost after switching tab, maybe scope the atoms outside, after all.
-   (if (== 1 (:index @page-state)) [add-account] nil)])
+   (case (:index @page-state)
+     0 (show-accounts)
+     1 [add-account]
+     2 [:h1 "Bye"])
+   ])
   ;; https://github.com/arttuka/reagent-material-ui/issues/44

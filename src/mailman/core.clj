@@ -27,15 +27,19 @@
 
 
 
-
-
 ;; (create-account "DEV"
 ;;                 (System/getenv "MM_IMAP_SERVER")
 ;;                 (System/getenv "MM_EMAIL_ADDRESS")
-;;                 (System/getenv "MM_EMAIL_PASSWORD"))
+;;                 (System/getenv "MM_EMAIL_PASSWORD")
+;;                 )
+;; ;; (reset! parsed-messages (mail/get-all-parsed-from-headers
+;; ;;                          (System/getenv "MM_IMAP_SERVER")
+;; ;;                          (System/getenv "MM_EMAIL_ADDRESS")
+;; ;;                          (System/getenv "MM_EMAIL_PASSWORD"))
+;; ;;         )
+;; ;; (queries/insert-account "DEV")
+;; ;; (queries/insert-services 1 (distinct (map :maindomain @parsed-messages)))
+;; ;; (queries/insert-subservices 1 @parsed-messages)
 ;; (print 5)
-;; (db/insert-account "DEV")
-;; (db/insert-account-services 1 (distinct (map :maindomain @parsed-messages)))
-;; (db/insert-account-service-details 1 @parsed-messages)
 
 ;; TODO NEXT Create API/Server
