@@ -172,7 +172,7 @@
                             :adapter-locale DateTimeSymbols_en_US}
      (nav-bar)
      ;; TODO Add Borders to "main-render area"
-     [container {:maxWitdh "sm"}
+     [container {:sx {:maxWitdh "sm"}}
       (current-page)
       ]]]])
 
