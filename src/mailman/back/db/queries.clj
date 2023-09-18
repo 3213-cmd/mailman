@@ -39,6 +39,10 @@
   [account-id]
   (execute-query ["Select account_id, name, category FROM services where account_id =?" account-id]))
 
+(defn count-account-services
+  [account-id]
+  (execute-query ["Select COUNT(name) as total_registered_services FROM services where account_id =?" account-id]))
+
 (defn find-all-accounts []
   (execute-query ["SELECT * FROM accounts"]))
 

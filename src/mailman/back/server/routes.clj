@@ -78,7 +78,7 @@
                   :reponses {200 {:body ::graphql-response}}
                   :handler (fn [_]
                              {:status 200
-                              :body (graphql/q "{allAccounts {accountId name}}")})}}
+                              :body (graphql/q "{allAccounts {accountId name totalRegisteredServices}}")})}}
     ]])
 
 

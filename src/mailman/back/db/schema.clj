@@ -23,6 +23,16 @@
                              :services/name :name
                              :services/category :category}))
 
+(defn- remap-total-registered-services
+  [row-data]
+  (set/rename-keys row-data {:total_registered_services :totalRegisteredServices}))
+;; TODO could remove the remapping and return the number directly
+(defn resolve-total-registered-services
+  [_ _ args]
+  (:totalRegisteredServices (remap-total-registered-services (first (queries/count-account-services (:accountId args))))))
+
+(resolve-total-registered-services 0 0 {:accountId 1})
+
 (defn resolve-services-by-account-id
   [_ _ args]
   (map remap-service (queries/find-account-services (:accountId args))))
@@ -65,6 +75,7 @@
   {:Query/account (partial resolve-account-by-id)
    :Query/allAccounts (partial resolve-all-accounts)
    :Account/registeredServices (partial resolve-services-by-account-id)
+   :Account/totalRegisteredServices (partial resolve-total-registered-services)
    :Service/information (partial resolve-service-information)
    :Service/subservices (partial resolve-service-subservices)
    })

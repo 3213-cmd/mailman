@@ -29,7 +29,7 @@
       simplify))
 ;; (q {:acocunt 1})
 ;; TODO learn about introspection
-(q "{allAccounts {name}}")
+(q "{allAccounts {totalRegisteredServices}}")
 ;; (q "{ account(accountId: 1) { accountId name}}" )
 ;; (q "{ account(accountId: 1) { accountId name registeredServices {name information {name category changeLink} subservices {serviceName psl}}}}" )
 ;; (q "{ account(id: 1) { id name registeredServices {name id belongingAccount {name id}}  }}" )

@@ -7,7 +7,9 @@
             :name {:type String
                    :description "The account name"}
             :registeredServices {:type (list :Service)
-                                 :description "List of services registered to the account"}}}
+                                 :description "List of services registered to the account"}
+            :totalRegisteredServices {:type Int
+                                      :description "Number of registered services to the account"}}}
 
   :Service
   {:description "A service registered to an acocunt."
