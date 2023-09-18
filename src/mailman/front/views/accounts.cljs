@@ -7,6 +7,11 @@
    [reagent-mui.material.input-label :refer [input-label]]
    [reagent-mui.material.menu-item :refer [menu-item]]
    [reagent-mui.material.text-field :refer [text-field]]
+   [reagent-mui.material.box :refer [box]]
+   [reagent-mui.material.list :refer [list]]
+   [reagent-mui.material.list-item :refer [list-item]]
+   [reagent-mui.material.list-item-secondary-action :refer [list-item-secondary-action]]
+   [reagent-mui.material.list-item-text :refer [list-item-text]]
    [reagent-mui.material.stack :refer [stack]]
    [reagent-mui.material.grid :refer [grid]]
    [reagent-mui.material.tab :refer [tab]]
@@ -15,6 +20,8 @@
    [reagent.core :as reagent :refer [atom]]
    [reagent-mui.x.date-picker :refer [date-picker]]
    [reagent-mui.material.tooltip :refer [tooltip]]
+   [reagent-mui.icons.delete :refer [delete]]
+   [reagent-mui.material.icon-button :refer [icon-button]]
    [reagent-mui.material.typography :refer [typography]]
    [ajax.core :refer [GET POST]]))
    ;; [reagent-mui.x.date-range-picker-pro :refer [date-range-picker-pro]]
@@ -235,25 +242,39 @@
    [tab {:value 1
          :on-click (fn [] (swap! page-state assoc :index 1))
          :label "Add Accounts"}]
-   [tab {:value 2
-         ;; :disabled true
-         :on-click (fn [] (swap! page-state assoc :index 2))
-         :label "Manage Accounts"}]])
+   ;; [tab {:value 2
+   ;;       ;; :disabled true
+   ;;       :on-click (fn [] (swap! page-state assoc :index 2))
+   ;;       :label "Manage Accounts"}]
+   ])
 
 
-(defn show-accounts []
-  (let [accounts (GET "http://localhost:3000/accounts/all")]
-    (println accounts)))
+(defn account-list-item [account]
+  ^{:key (:name account)}
+  [list-item
+   [list-item-text {:primary (:name account)
+                    :secondary (str "Registered Services: " (:totalRegisteredServices account))}]
+   [list-item-secondary-action [icon-button [delete]]]])
 
-(show-accounts)
+(defn account-list []
+  (let [registered-accounts (atom nil)]
+    (GET "http://localhost:3000/accounts/all"
+         {:handler (fn [response] (reset! registered-accounts (:allAccounts (:data response))))})
+    (fn [] [grid {:style {:alignItems "center"}}
+           [:div {:style {:margin-top "2em"}}
+            [box {:sx {:minWidth 400}}
+             [list {:sx {:bgcolor "#f3f6f9"}}
+              (map account-list-item @registered-accounts)]]]])))
+
+
 
 (defn home-page []
   [:<>
    [account-tabs]
    ;; Atom States are lost after switching tab, maybe scope the atoms outside, after all.
    (case (:index @page-state)
-     0 (show-accounts)
+     0 [account-list]
      1 [add-account]
-     2 [:h1 "Bye"])
+     2 [:h1 "Byes"])
    ])
   ;; https://github.com/arttuka/reagent-material-ui/issues/44
