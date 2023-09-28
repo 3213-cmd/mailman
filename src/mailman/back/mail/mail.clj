@@ -31,13 +31,10 @@
      (into [curr-path]
            (mapcat #(flat % curr-path) childs)))))
 
-
-;; https://stackoverflow.com/questions/31741252/clojure-map-pass-function-multiple-parameters
-
-;; The flat function returns strings that start with "/", we need to remove the first "/"
-(defn clean [collection]
-  (map #(subs % 1) collection)
-  )
+(defn clean
+  "Used to remove leading forwardslahes created by the flat function"
+  [collection]
+  (map #(subs % 1) collection))
 
 ;; the function folders returns a nested structure, but to access a subfolder a full path has to be given.
 (defn get-folders
