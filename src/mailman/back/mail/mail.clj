@@ -7,16 +7,25 @@
             [clojure.string :as str])
   (:import com.google.common.net.InternetDomainName))
 
+;; make atoms list of tuples {:name :store}
 ;; I use atoms to store values, to not hit rate limits when testing
-(def user-store (atom nil))
-(def user-folders (atom nil))
-(def user-messages (atom nil))
-(def user-headers (atom nil))
-;; (def parsed-messages (atom nil))
+  ;; IDEA Change to dynamics vars or agents, but probably not needed.
+(def user-state
+  "Stores the user state which contains:
+  - name
+  - store
+  - folders
+  - messages
+  - headers"
+  (atom {:users []}))
+(def user-progress
+  "Stores progress for the fetching of headers, seperate from user-state to not invoke heavy load to constant updating of the large user-state atom"
+  (atom {:users []}))
+
 (defn create-store
   "Create an IMAP store and store it's value inside the user-store atom"
   [imap-server email-address password]
-  (reset! user-store (store imap-server email-address password)))
+  (store imap-server email-address password))
 
 (defn flat
   "Used to flatten a nested structure.
@@ -39,25 +48,58 @@
 ;; the function folders returns a nested structure, but to access a subfolder a full path has to be given.
 (defn get-folders
   "Returns a seq of the full paths of all IMAP folders"
-  [store]
-  (reset! user-folders (doall (mapcat (comp flatten clean flat) (folders store)))))
+  [user-store]
+  (doall (mapcat (comp flatten clean flat) (folders user-store))))
 
-
-;; Rewrite
 ;; TODO exclude folders
 (defn get-all-messages
   "Given an IMAP store return all messages from it."
-  [folders]
-  (reset! user-messages (doall (mapcat #(all-messages @user-store %) folders))))
+  [store folders]
+  (doall (mapcat #(all-messages store %) folders)) )
 
+;; REVIEW redundant let?
+(defn get-user-index
+  "Get the index of of a user in a map with the structure {:users { {:name A} {:name B}}}"
+  [users name]
+  (let [index (.indexOf (map :name (:users users)) name)]
+    index))
 
-;; FIXME There should be a more optimal way to store my messages, so that I do not have to "unpack a message" by calling first, but I cannot test much due to tieouts and I want to continue
-;; https://stackoverflow.com/questions/4367358/whats-the-difference-between-sender-from-and-return-path
+;; Gets all the headers and updates the progress count, while doing so.
+;; Limit is for testing purposes, to stop fetching messages after a certain amount of items
+;; REVIEW user-messages is redundant, get them from user-state. Instead pass user-name and get progress-index and state-index
+(defn get-headers-with-progress [user-messages index limit]
+  (loop [messages user-messages
+         result []]
+    (if (or (empty? messages) (= (if (nil? limit) 1000000 limit) (get-in @user-progress [:users index :progress])))
+      result (do
+               (swap! user-progress update-in [:users index :progress] inc)
+               (recur (drop 1 messages) (conj result (first (message/from (first messages)))))))))
+
+;; TODO Idealy this will be wrapped in (async/thread) from clojure.core.async
+;; But I need to figure out how to kill single threads from the core.async library without killing the repl
 ;; From and Sender is different, the sender header is not always available so from is better
 (defn get-all-from-headers
-  "Gets all distinct from headers from a given IMAP store"
-  [messages]
-  (reset! user-headers (distinct (doall (mapcat (comp vector message/from) messages)))))
+  ([imap-server email-address password name] (get-all-from-headers imap-server email-address password name nil))
+  ([imap-server email-address password name limit]
+   ;; If user is already existing, do nothing.
+   ;; Should NOT happen, since the core function calling this function already checks if the user is registered to the database.
+   (if (neg? (get-user-index @user-state name))
+     (do
+       ;; Insert User Into the User-State, if it does not exist
+       (swap! user-state assoc-in [:users (count (:users @user-state)) :name] name)
+       (let [index (get-user-index @user-state name)]
+         (swap! user-progress assoc-in [:users index :name] name)
+         (swap! user-state assoc-in [:users index :store] (create-store imap-server email-address password))
+         (swap! user-state assoc-in [:users index :folders] (get-folders (:store (nth (:users @user-state) index))))
+         (swap! user-state assoc-in [:users index :messages] (get-all-messages (get-in @user-state [:users index :store])
+                                                                               (get-in @user-state [:users index :folders])))
+         (swap! user-progress assoc-in [:users index :messages] (count (get-in @user-state [:users index :messages ])))
+         (swap! user-progress assoc-in [:users index :progress] 0)
+         (swap! user-state assoc-in [:users index :headers] (get-headers-with-progress (get-in @user-state [:users index :messages]) index limit))
+         ()))
+     ;; TODO after information has been consumed and stored dissoc it, make check to see if name is in DB
+     ;; TODO adjust consuming functions
+     nil)))
 
 ;; Uses destructuring in the let form
 (defn parse-from-header
@@ -72,12 +114,8 @@
      :maindomain (first (-> (InternetDomainName/from domain) (.topPrivateDomain) (.parts)))
      :psl (-> (InternetDomainName/from domain) (.publicSuffix) (.toString))}))
 
-(defn get-all-parsed-from-headers
-  "Given a mail-store returns all distinct from-headers, parsed for further processing"
-  [imap-server email-address password]
-  (reset! user-headers (map (comp parse-from-header first)
-                            (get-all-from-headers
-                             (get-all-messages
-                              (get-folders
-                               (create-store imap-server email-address password)))))))
+(defn get-parsed-headers-by-account-name [account-name]
+  (let [index (get-user-index @user-state account-name)]
+    (distinct (map parse-from-header (get-in @user-state [:users index :headers])))))
 
+(get-parsed-headers-by-account-name "DEV")
