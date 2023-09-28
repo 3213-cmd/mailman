@@ -81,35 +81,3 @@
                               (get-folders
                                (create-store imap-server email-address password)))))))
 
-
-;; FIXME I need another Regex.
-;; TODO per https://stackoverflow.com/a/73653579q
-(def my-pattern #"^(?<Email>.*@)?(?<Protocol>\w+:\/\/)?(?<SubDomain>(?:[\w-]{2,63}\.){0,127}?)?(?<DomainWithTLD>(?<Domain>[\w-]{2,63})\.(?<TopLevelDomain>[\w-]{2,63}?)(?:\.(?<CountryCode>[a-z]{2}))?)(?:[:](?<Port>\d+))?(?<Path>(?:[\/]\w*)+)?(?<QString>(?<QSParams>(?:[?&=][\w-]*)+)?(?:[#](?<Anchor>\w*))*)?$")
-(defn parse-message [message]
-  (let [regex-vec (re-matches my-pattern (message :address))]
-    [{:name (message :name )
-      :full-email  (regex-vec 0)
-      :email (regex-vec 1)
-      ;; :protocol (regex-vec 2)
-      :subdomain (regex-vec 3)
-      :domainwithtld (regex-vec 4)
-      :domain (regex-vec 5)
-      :tld (regex-vec 6)
-      :countrycode (regex-vec 7)
-      ;; :port (regex-vec 8)
-      ;; :path (regex-vec 9)
-      ;; :qstring (regex-vec 10)
-      }]))
-
-
-;; FIXME There should be a more optimal way to store my messages, so that I do not have to "unpack a message" by calling first, but I cannot test much due to tieouts and I want to continue
-;; I need to update an atom, to create a status bar. perhaps 2d array, with email name/progress
-;; (defn store-all-sender-information [messages]
-;;   (loop [stored-messages []
-;;          message-count 0]
-;;     (if (< 0 (compare message-count (count messages)))
-;;       stored-messages
-;;       ;; (distinct (conj stored-messages (distinct (map message/sender (take 20 (drop message-count messages))))))
-;;       (recur (distinct (conj stored-messages (distinct (map message/sender (take 20 (drop message-count messages))))))
-;;              (+ message-count 20)
-;;              ))))
