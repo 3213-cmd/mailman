@@ -16,14 +16,19 @@
 ;; Default false, true if adding new account.
 (def locked (atom nil))
 
-;; (db/start-db)
+(db/start-db)
 (defn create-account
   [account-name imap-server email-address email-password]
   (let [account-id (queries/insert-account account-name)]
-    (reset! parsed-messages (mail/get-all-parsed-from-headers imap-server email-address email-password))
-    (queries/insert-services account-id (distinct (map :maindomain @parsed-messages)))
-    (queries/insert-subservices account-id @parsed-messages)
-    ))
+    (do
+      ;; (reset! parsed-messages (mail/get-all-parsed-from-headers imap-server email-address email-password))
+      (let [parsed-messages (mail/get-parsed-headers-by-account-name account-name)]
+        (queries/insert-services account-id (distinct (map :maindomain parsed-messages)))
+        (queries/insert-subservices account-id parsed-messages))
+      ;; dissoc the user from the state atom and progress atom
+      )))
+
+
 
 
 
