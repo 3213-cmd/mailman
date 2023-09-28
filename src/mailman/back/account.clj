@@ -26,11 +26,9 @@
 (defn create-account
   [account-name imap-server email-address email-password]
   (let [account-id (insert-account account-name)]
-    (do
-      (mail/get-all-from-headers account-name imap-server email-address email-password)
-      ;; (reset! parsed-messages (mail/get-all-parsed-from-headers imap-server email-address email-password))
-      (let [parsed-messages (mail/get-parsed-headers-by-account-name account-name)]
-        (insert-services account-id (distinct (map :maindomain parsed-messages)))
-        (insert-subservices account-id parsed-messages))
-      ;; dissoc the user from the state atom and progress atom
-      )))
+    (do (mail/get-all-from-headers account-name imap-server email-address email-password)
+        ;; (reset! parsed-messages (mail/get-all-parsed-from-headers imap-server email-address email-password))
+        (let [parsed-messages (mail/get-parsed-headers-by-account-name account-name)]
+          (insert-services account-id (distinct (map :maindomain parsed-messages)))
+          (insert-subservices account-id parsed-messages))
+        (mail/dissoc-user account-name))))

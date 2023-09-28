@@ -118,4 +118,15 @@
   (let [index (get-user-index @user-state account-name)]
     (distinct (map parse-from-header (get-in @user-state [:users index :headers])))))
 
+(defn dissoc-user
+  "Dissoc a user from the user-state and user-progress
+  If I new earlier that I could have indexes inside my maps, I could have avoided this.
+  i.e. (dissoc {1 {:name \"A\"} 2 {:name \"B\"}} 1) => {2 {:name \"B\"}}"
+  [name]
+  (do (let [state-index (get-user-index @user-state name )
+            progress-index (get-user-index @user-state name)]
+        (swap! user-state update-in [:users state-index] dissoc :name :messages :folders :store :headers)
+        (swap! user-progress update-in [:users progress-index ] dissoc :name :messages :progress))
+      nil))
+
 (get-parsed-headers-by-account-name "DEV")
