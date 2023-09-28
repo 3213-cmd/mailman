@@ -18,12 +18,13 @@
   [imap-server email-address password]
   (reset! user-store (store imap-server email-address password)))
 
-;; Multiple Arity Function, if only one input value is provided use first order
-;; (defn messenger
-;;   ([]     (messenger "Hello world!"))
-;;   ([msg]  (println msg)))
-;; TODO Comment
 (defn flat
+  "Used to flatten a nested structure.
+   Since mail.folders returns them as such:
+   {\"Folder1\" {\"Folder2\" {\"Folder3\"} }}
+   Will be turned into:
+   {\"/Folder1\" \"/Folder2\" \"/Folder2/Folder3\"}
+   the leading forwardslash will be later removed"
   ([t] (flat t ""))
   ([[label & childs] path]
    (let [curr-path (str path "/" label)]
