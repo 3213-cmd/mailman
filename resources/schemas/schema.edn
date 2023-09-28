@@ -58,4 +58,29 @@
                   :args {}}
     :service {:type :Service
               :description "Access a known service by its unique id, if it exists"
-              :args {:id {:type Int}}}}}}}
+              :args {:id {:type Int}}}}}
+  :Mutation
+  {:fields
+   {:addAccount
+    {:type :Account
+     :description "Add a new user to the service"
+     :args
+     {:name {:type (non-null String)}
+      :emailAddress {:type (non-null String)}
+      :password {:type (non-null String)}
+      :provider {:type (non-null Int)}
+      :inboundProtocol {:type  String}
+      :inboundHostname {:type  String}
+      :inboundPort {:type  Int}
+      :inboundSecurity {:type  String}
+      :inboundAuthMethod {:type  String}
+      :inboundUsername {:type  String}
+      :outboundHostname {:type  String }
+      :outboundAuthMethod {:type String}
+      :outboudUsername {:type  String }
+      :outboundSecurity {:type String}
+      :outboundPort {:type Int}
+      ;; :outboundProtocol
+      }
+     }}}
+  }}

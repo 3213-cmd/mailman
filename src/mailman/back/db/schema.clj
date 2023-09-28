@@ -7,6 +7,7 @@
             [next.jdbc :as jdbc]
             [clojure.set :as set]
             [com.walmartlabs.lacinia.executor :as executor]
+            [mailman.back.account :refer [create-account]]
             [mailman.back.db.queries :as queries]))
 
 (defn- remap-account
@@ -62,6 +63,11 @@
                              :subservices/psl :psl
                              }))
 
+(defn resolve-add-account
+  [_ args _ ]
+  (let [advanced-settings (dissoc args :name :emailAddress :password)]
+    (create-account (:name args) (:provider args) (:emailAddress args) (:password args) advanced-settings )))
+
 (defn resolve-service-subservices
   [_ _ args]
   (map remap-subservice (queries/find-subservices (:accountId args) (:name args))))
@@ -74,11 +80,11 @@
   ;; TODO learn more about partialfunctions
   {:Query/account (partial resolve-account-by-id)
    :Query/allAccounts (partial resolve-all-accounts)
+   :Mutation/addAccount (partial resolve-add-account)
    :Account/registeredServices (partial resolve-services-by-account-id)
    :Account/totalRegisteredServices (partial resolve-total-registered-services)
    :Service/information (partial resolve-service-information)
-   :Service/subservices (partial resolve-service-subservices)
-   })
+   :Service/subservices (partial resolve-service-subservices)})
 
 (defn load-schema
   []
