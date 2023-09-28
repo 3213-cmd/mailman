@@ -7,6 +7,7 @@
   :min-lein-version "2.7.1"
 
   :dependencies [[org.clojure/clojure "1.11.1"]
+                 [org.clojure/core.async "1.6.681"]
                  [io.forward/clojure-mail "1.0.8"]
                  [com.github.seancorfield/next.jdbc "1.3.883"]
                  [com.github.seancorfield/honeysql "2.4.1045"]
