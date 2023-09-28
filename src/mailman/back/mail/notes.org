@@ -1,0 +1,14 @@
+#+title: Notes
+
+* Notes
+Testing all the functions turns out to be harder than expected, because of different mail providers behaving differently when interacting with their IMAP servers.
+The reasons for the different behavior and timeouts  are not always documented.
+- GMX seems not to have any rate limits
+- Microsoft seems to rate-limit when the same operation is performed twice on the same object, which does not make it an optimal platform for testing.
+- Google has not been tested, but seems to have daily usage limits see: [[TODO -> insert link][Gmail Bandwith Limits]]
+
+
+* OAUTH2
+Some commercial mail providers seem to be switching to OAUTH2, this is something worth considering to implement in the future
+See:
+ - [[https://support.microsoft.com/en-au/office/pop-imap-and-smtp-settings-for-outlook-com-d088b986-291d-42b8-9564-9c414e2aa040][Microsoft Pop and Imap and smtp settings]]

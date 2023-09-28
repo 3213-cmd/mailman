@@ -4,22 +4,8 @@
             [clojure-mail.message :refer (read-message)]
             [clojure-mail.message :as message]
             ;; TODO Remove Later
-            [clojure.string :as str]
-            )
+            [clojure.string :as str])
   (:import com.google.common.net.InternetDomainName))
-
-
-;; Testing all the functions turned out harder than expected, because of mail providers behaving differently when interacting with their IMAP servers.
-;; The reasons for the different behaviors are not always documented.
-;; GMX seems not to have any rate limits
-;; Microsoft seems to rate-limit when the same operation is performed twice on an object, which does not make it an optimal platform for testing.
-;; If you mess something up, you have to wait to try it again.
-;; Google has not been tested, but seems to have daily usage limits TODO -> insert link
-;;
-;; Some commercial mail providers seem to be switching to OAUTH2, this is something worth considering to implement in the future.
-;; https://support.microsoft.com/en-au/office/pop-imap-and-smtp-settings-for-outlook-com-d088b986-291d-42b8-9564-9c414e2aa040
-
-
 
 ;; I use atoms to store values, to not hit rate limits when testing
 (def user-store (atom nil))
