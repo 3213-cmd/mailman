@@ -77,7 +77,7 @@
       :inboundUsername {:type  String}
       :outboundHostname {:type  String }
       :outboundAuthMethod {:type String}
-      :outboudUsername {:type  String }
+      :outboundUsername {:type  String }
       :outboundSecurity {:type String}
       :outboundPort {:type Int}
       ;; :outboundProtocol
