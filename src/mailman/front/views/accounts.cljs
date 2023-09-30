@@ -10,17 +10,26 @@
    [reagent-mui.material.box :refer [box]]
    [reagent-mui.material.list :refer [list]]
    [reagent-mui.material.list-item :refer [list-item]]
+   [reagent-mui.material.list-item-button :refer [list-item-button]]
+   [reagent-mui.material.list-item-icon :refer [list-item-icon]]
    [reagent-mui.material.list-item-secondary-action :refer [list-item-secondary-action]]
    [reagent-mui.material.list-item-text :refer [list-item-text]]
    [reagent-mui.material.stack :refer [stack]]
+   [reagent-mui.icons.close :refer [close]]
    [reagent-mui.material.grid :refer [grid]]
+   [reagent-mui.x.data-grid :refer [data-grid]]
+   [reagent-mui.util :refer [clj->js' wrap-clj-function]]
    [reagent-mui.material.tab :refer [tab]]
+   [reagent-mui.material.dialog :refer [dialog]]
    [reagent-mui.material.tabs :refer [tabs]]
    [reagent-mui.material.container :refer [container]]
    [reagent.core :as reagent :refer [atom]]
+   [reagent-mui.material.app-bar :refer [app-bar]]
+   [reagent-mui.material.toolbar :refer [toolbar]]
    [reagent-mui.x.date-picker :refer [date-picker]]
    [reagent-mui.material.tooltip :refer [tooltip]]
    [reagent-mui.icons.delete :refer [delete]]
+   [reagent-mui.icons.visibility :refer [visibility]]
    [reagent-mui.material.icon-button :refer [icon-button]]
    [reagent-mui.material.typography :refer [typography]]
    [ajax.core :refer [GET POST]]))
@@ -200,8 +209,9 @@
                    :on-change   (fn [e] (swap! add-account-state assoc :outbound-username (event-value e)))}]]]]])
 
 
-  ;; Atom is scoped, if not around anonymous function atom is not scoped
-  ;; https://clojureverse.org/t/atom-in-let-inside-of-function-does-not-work/7531
+
+;; Atom is scoped, if not around anonymous function atom is not scoped
+;; https://clojureverse.org/t/atom-in-let-inside-of-function-does-not-work/7531
 (defn add-account []
   (let [password (atom nil)]
     (fn []
@@ -222,10 +232,6 @@
            [grid {:item true :xs 12 :sm 6}
             [button {:variant "contained"
                      :on-click (fn [] (reset-add-account-state))} "Reset"]]]]]]])))
-
-
-
-
 
 ;; https://legacy.reactjs.org/docs/fragments.html
 ;; https://stackoverflow.com/questions/71438263/how-to-return-two-customsvgseries-from-a-single-function-in-clojurescript
@@ -248,13 +254,125 @@
    ;;       :label "Manage Accounts"}]
    ])
 
+(def mail-view-state (atom {:open false :accountId 0 :view 0}))
+
+
+(def columns2 [{:field :name
+                :headerName "Name"
+                :widh 90
+                :flex true}
+               {:field :category
+                :headerName "Category"
+                :width 90
+                :flex true}])
+
+(def columns [{:field      :id
+               :headerName "ID"
+               :width      90
+               :flex true}
+              {:field      :first-name
+               :headerName "First name"
+               :width      150
+               :editable   true}
+              {:field      :last-name
+               :headerName "Last name"
+               :width      150
+               :editable   true
+               :flex true}
+              {:field      :age
+               :headerName "Age"
+               :type       :number
+               :width      110
+               :editable   true
+               :flex true}
+              {:field       :full-name
+               :headerName  "Full name"
+               :description "This column has a value getter and is not sortable."
+               :sortable    false
+               :width       160
+               :flex true
+               :valueGetter (wrap-clj-function
+                             (fn [params]
+                               (str (get-in params [:row :first-name] "") " " (get-in params [:row :last-name] ""))))}])
+
+
+(def registered-services-list (atom nil))
+
+(defn get-registered-services []
+  (POST "http://localhost:3000/graphql/"
+        {:format :json
+         :params {:query "{ account(accountId: 1) { registeredServices { name category}}}"}
+         :handler (fn [response] (reset! registered-services-list (map #(assoc %1 :id %2) (:registeredServices (:account (:data response))) (iterate inc 0))))}))
+
+(get-registered-services)
+
+(println @registered-services-list)
+
+(def rows [{:id 1 :last-name "Snow" :first-name "Jonathanso" :age 35}
+           {:id 2 :last-name "Lannister" :first-name "Cersei" :age 42}
+           {:id 3 :last-name "Lannister" :first-name "Jaime" :age 45}
+           {:id 4 :last-name "Stark" :first-name "Arya" :age 16}
+           {:id 5 :last-name "Targaryen" :first-name "Daenerys" :age nil}
+           {:id 6 :last-name "Melisandre" :first-name nil :age 150}
+           {:id 7 :last-name "Clifford" :first-name "Ferrara" :age 44}
+           {:id 8 :last-name "Frances" :first-name "Rossini" :age 36}
+           {:id 9 :last-name "Roxie" :first-name "Harvey" :age 65}])
+
+(def rows2 [{:id 1 :name "Snow" :category "Jonathanso"}
+           {:id 2 :name "Roxie" :category "Harvey"}])
+
+(defn services-list []
+  [data-grid {:rows                           @registered-services-list
+              :columns                        columns2
+              ;; :initial-state                  (clj->js' {:pagination {:pagination-model {:page-size 15}}})
+              :page-size-options              [6]
+              :checkbox-selection             true
+              :disable-row-selection-on-click true
+              :flex true}])
+
+
+
+
+(defn toggle-mail-view-state [accountId view]
+  (if (:open @mail-view-state)
+    (swap! mail-view-state assoc :open false :accountId accountId :view 0)
+    (swap! mail-view-state assoc :open true :accountId accountId :view 0)))
+
+(println @mail-view-state)
 
 (defn account-list-item [account]
   ^{:key (:name account)}
   [list-item
-   [list-item-text {:primary (:name account)
-                    :secondary (str "Registered Services: " (:totalRegisteredServices account))}]
+   [list-item-button {:on-click #(toggle-mail-view-state (:accountId account ) 0)}
+    [list-item-icon [visibility]]
+    [list-item-text {:primary (:name account)
+                     :secondary (str "Registered Services: " (:totalRegisteredServices account))}]]
    [list-item-secondary-action [icon-button [delete]]]])
+
+
+(defn mail-list-view []
+  [:<>
+   [dialog {:open (:open @mail-view-state) :fullScreen true}
+    [app-bar { ;; :variant "dense"
+              :color "primary"
+              :position "static"}
+     [toolbar {:color "primary"
+               :size "large"
+               :edge "start"
+               :class "top-bar-class"}
+      [icon-button {:on-click #(toggle-mail-view-state nil nil)}
+       [close]]
+      [button {:variant "contained"
+               :size "small"
+               :on-click #(js/alert "Hello there!")
+               :color "primary"} "Service View"]
+      [button {:variant "contained"
+               :size "small"
+               :on-click #(js/alert "Hello there!")
+               :color "primary"} "SubService View"]]]
+    (case (:view @mail-view-state)
+      0 [services-list])
+    ]])
 
 (defn account-list []
   (let [registered-accounts (atom nil)]
@@ -264,7 +382,10 @@
            [:div {:style {:margin-top "2em"}}
             [box {:sx {:minWidth 400}}
              [list {:sx {:bgcolor "#f3f6f9"}}
-              (map account-list-item @registered-accounts)]]]])))
+              (map account-list-item @registered-accounts)]
+             ;; TODO use app-bar with close /open buttons
+             [mail-list-view]]]])))
+
 
 
 
